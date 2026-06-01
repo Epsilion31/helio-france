@@ -1,79 +1,73 @@
 import requests
+import json
+import urllib3
 
-# Remplace ici par tes vrais identifiants de l'application Heliofrance
-USERNAME = "TON_EMAIL_OU_UTILISATEUR"
-PASSWORD = "TON_MOT_DE_PASSE"
+# Désactivation des alertes SSL pour le réseau de l'école
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+#USERNAME = "adrien.lavergne@2027.icam.fr"
+#PASSWORD = "Tcpl#mdpte2021."
+USERNAME = "victor.grebet@2027.icam.fr"
+PASSWORD = "Azerty12345"
 BASE_URL = "https://heliofrance-data.fr"
 
 def obtenir_token():
-    """Étape 1: S'authentifier auprès du serveur pour obtenir le Token."""
+    """S'authentifie auprès du serveur pour obtenir le Token."""
     url = f"{BASE_URL}/api-token-auth/"
-    payload = {
-        "username": USERNAME,
-        "password": PASSWORD
-    }
+    payload = {"username": USERNAME, "password": PASSWORD}
     
     print("Demande de token d'authentification...")
     try:
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, json=payload, timeout=10, verify=False)
         if response.status_code == 200:
-            token = response.json().get("token")
             print("✅ Authentification réussie !")
-            return token
+            return response.json().get("token")
         else:
-            print(f"Échec d'authentification ({response.status_code}) : {response.text}")
+            print(f"❌ Échec d'authentification ({response.status_code})")
             return None
     except Exception as e:
-        print(f"Erreur lors de la connexion au serveur : {e}")
+        print(f"❌ Erreur connexion : {e}")
         return None
 
 def recuperer_telemetrie(token):
-    """Étape 2: Récupérer la liste des appareils puis les données des capteurs."""
+    """Récupère les appareils et affiche les données de télémétrie."""
     headers = {
         "Authorization": f"Token {token}",
         "Content-Type": "application/json"
     }
-    
-    # 1. On récupère d'abord l'ID de l'appareil
     url_devices = f"{BASE_URL}/devices/"
+    
     try:
-        response_devices = requests.get(url_devices, headers=headers, timeout=10)
-        if response_devices.status_code != 200 or not response_devices.json():
-            print("Impossible de récupérer la liste des appareils.")
+        response = requests.get(url_devices, headers=headers, timeout=10, verify=False)
+        if response.status_code != 200:
+            print(f"❌ Erreur serveur lors de la récupération : {response.status_code}")
             return
-        
-        # On prend le premier appareil de la liste
-        device = response_devices.json()[0]
-        device_id = device.get("id")
+
+        devices = response.json()
+        if not devices:
+            print("❌ Aucun appareil trouvé sur ce compte.")
+            return
+
+        # On sélectionne le premier appareil trouvé (ID: 1284 - Test R&D)
+        device = devices[0]
         device_name = device.get("custom_name") or device.get("name")
-        print(f"Appareil trouvé : {device_name} (ID: {device_id})")
-        
-        # 2. On interroge la télémétrie de cet appareil
-        # Note: on utilise généralement le dernier échantillon enregistré
-        url_telemetry = f"{BASE_URL}/devices/{device_id}/telemetry/"
-        response_telemetry = requests.get(url_telemetry, headers=headers, timeout=10)
-        
-        if response_telemetry.status_code == 200:
-            # Selon la structure, c'est souvent une liste des dernières mesures
-            data_list = response_telemetry.json()
-            if isinstance(data_list, list) and len(data_list) > 0:
-                donnees = data_list[0] # Le plus récent
-            else:
-                donnees = data_list
-            
-            print("\n===DONNÉES CAPTEURS (CLOUD) ===")
-            print(f"Capteur Solaire (Panneau) : {donnees.get('solar_panel')} °C")
-            print(f"Ballon Temp Haut           : {donnees.get('tank_high')} °C")
-            print(f"Ballon Temp Bas            : {donnees.get('tank_low')} °C")
-            print(f"Pression du système        : {donnees.get('pressure')} bar")
-            print(f"Circulateur Solaire (Pompe): {'Allumé' if donnees.get('relay_pump') else 'Éteint'}")
-            print("===================================\n")
-        else:
-            print(f"Erreur lors de la récupération des capteurs : {response_telemetry.status_code}")
-            
+        telemetry = device.get("last_telemetry", {})
+
+        print(f"\n===========================================")
+        print(f"📡 APPAREIL : {device_name} (UUID: {device.get('uuid')})")
+        print(f"📅 Date des données : {telemetry.get('date')}")
+        print(f"===========================================")
+        print(f"☀️ Capteur Solaire (Panneau)  : {telemetry.get('solar_panel')} °C")
+        print(f"🧪 Température Ballon Haut    : {telemetry.get('tank_high')} °C")
+        print(f"🧪 Température Ballon Bas     : {telemetry.get('tank_low')} °C")
+        print(f"💧 Température Entrée Eau     : {telemetry.get('tank_input')} °C")
+        print(f"🔄 Circulateur (Pompe)        : {'Allumé' if telemetry.get('relay_pump') else 'Éteint'}")
+        print(f"⚡ Résistance d'Appoint (Boost): {'Allumée' if telemetry.get('relay_boost') else 'Éteinte'}")
+        print(f"🎈 Pression du Système        : {telemetry.get('pressure')} bar")
+        print(f"===========================================\n")
+
     except Exception as e:
-        print(f"Erreur lors de la récupération des données : {e}")
+        print(f"❌ Erreur lors de l'extraction des données : {e}")
 
 if __name__ == "__main__":
     token_auth = obtenir_token()

@@ -1,0 +1,5 @@
+#USERNAME = "adrien.lavergne@2027.icam.fr"
+#PASSWORD = "Tcpl#mdpte2021."
+USERNAME = "victor.grebet@2027.icam.fr"
+PASSWORD = "Azerty12345"
+BASE_URL = "https://heliofrance-data.fr"
