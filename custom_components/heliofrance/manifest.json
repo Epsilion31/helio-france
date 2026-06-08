@@ -1,0 +1,11 @@
+{
+  "domain": "heliofrance",
+  "name": "Helio France e-HELIO",
+  "codeowner": ["@victorgrebet", "@adrienlavergne"],
+  "config_flow": true,
+  "documentation": "https://github.com/votre_profil_git/helio-france",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/votre_profil_git/helio-france/issues",
+  "requirements": [],
+  "version": "1.0.0"
+}

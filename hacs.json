@@ -1,0 +1,6 @@
+{
+  "name": "Helio France e-HELIO",
+  "type": "integration",
+  "homeassistant": "2024.1.0",
+  "render_readme": true
+}
