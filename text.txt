@@ -3,3 +3,9 @@ PASSWORD = "Tcpl#mdpte2021."
 USERNAME = "victor.grebet@2027.icam.fr"
 PASSWORD = "Azerty12345"
 BASE_URL = "https://heliofrance-data.fr"
+
+config home assistant
+helioicam
+wxcvbn
+
+clef de save home assistant : 0AGS-AYYG-CK6A-QM9Q-ANBR-5WCO-XFVU
