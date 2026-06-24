@@ -1,6 +1,10 @@
 {
+  "domain": "heliofrance",
   "name": "Helio France e-HELIO",
-  "type": "integration",
-  "homeassistant": "2024.1.0",
-  "render_readme": true
+  "codeowners": ["@Epsilion31"],
+  "config_flow": true,
+  "documentation": "https://github.com/Epsilion31/helio-france",
+  "issue_tracker": "https://github.com/Epsilion31/helio-france/issues",
+  "dependencies": [],
+  "version": "1.0.0"
 }
